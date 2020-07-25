@@ -1,9 +1,10 @@
 import re
-from flask import Flask, request, g
-from config import MOVIE_DIR_RE, TG_ON, BARK_ON
-from mods.douban import login, get_db_id2, get_db_info
-import mods.telegram as tg
+
 import mods.bark as bk
+import mods.telegram as tg
+from config import API_TOKENS, BARK_ON, MOVIE_DIR_RE, TG_ON
+from flask import Flask, render_template, request
+from mods.douban import get_db_id2, get_db_info, login
 
 app = Flask(__name__)
 
@@ -40,14 +41,16 @@ def get_movie(name, year):
 
 @app.route('/')
 def index():
-    return 'GoodBye World'
+
+    return 'Hello'
 
 
 @app.route('/downloaded')
 def downloaded():
     downloaded_dir = request.args.get('dir')
+    token = request.args.get('token')
 
-    if not downloaded_dir:
+    if not downloaded_dir or token not in API_TOKENS:
         res_result = '参数错误'
         return res_result
 
@@ -69,6 +72,9 @@ def downloaded():
         res_result = '无法识别\n'
 
     return res_result
+
+
+
 
 
 if __name__ == '__main__':

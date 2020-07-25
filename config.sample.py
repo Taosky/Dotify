@@ -25,3 +25,10 @@ BARK_ON = False
 
 # Bark Token列表
 BARK_TOKENS = ['',]
+
+# API Tokens
+API_TOKENS = ['cP06l5EXAAN4etW5 ',]
+
+# 代理(对Telegram生效)
+PROXY = False
+PROXY_URL = 'http://127.0.0.1:7890'

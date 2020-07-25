@@ -1,6 +1,6 @@
 import json
 import requests
-from config import TG_CHAT_ID, TG_BOT_TOKEN
+from config import TG_CHAT_ID, TG_BOT_TOKEN, PROXY_URL, PROXY
 
 
 def send_message(info_dict, url_path):
@@ -14,5 +14,13 @@ def send_message(info_dict, url_path):
 
     headers = {'Content-Type': 'application/json',
                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0'}
-    r = requests.post(url, headers=headers, data=json.dumps(data))
+
+    try:
+        if PROXY:
+            r = requests.post(url, headers=headers, data=json.dumps(
+                data), proxies={'http': PROXY_URL, 'https': PROXY_URL})
+        else:
+            r = requests.post(url, headers=headers, data=json.dumps(data))
+    except:
+        return None
     return r.json()['ok']
