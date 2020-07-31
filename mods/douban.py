@@ -1,5 +1,6 @@
 # coding: utf-8
 import json
+import re
 from datetime import datetime
 import requests
 from config import DB_API_KEY, DB_NAME, DB_PASSWORD
@@ -46,10 +47,42 @@ def get_db_id2(s, name, year):
     return None
 
 
-def get_db_info(s, subject_id):
+def get_db_info2(s,subject_id):
+    url = 'https://movie.douban.com/subject/{}/'.format(subject_id)
+    headers = {'User-Agent': UA}
+    for i in range(0,3):
+        try:
+            r0 = s.get(url, headers=headers)
+            r0.encoding = 'utf-8'
+            html = r0.text
+            imdb_id = re.search('>(tt\d+)<',html).group(1)
+            api_url = 'https://api.douban.com/v2/movie/imdb/{}?apikey={}'.format(imdb_id,DB_API_KEY)
+            r1 = s.get(api_url, headers=headers)
+            r1.encoding = 'utf-8'
+            info_json = json.loads(r1.text)
+            result = {
+                'title': info_json['title'],
+                '_type': '剧集' if 'episodes' in info_json['attrs'] else '电影',
+                'original_title': info_json['attrs']['title'][0],
+                'summary': info_json['summary'],
+                'directors': '，'.join(info_json['attrs']['director']),
+                'casts': '，'.join(info_json['attrs']['cast'][:3]),
+                'year': int(info_json['attrs']['year'][0]),
+                'update_date': datetime.now(),
+                'douban_url': info_json['mobile_link'],
+                'thumbnail_url': info_json['image'],
+                'douban_rating': info_json['rating']['average']}
+            return result
+            
+        except Exception as e:
+            print('第{}次获取info错误'.format(i))
+            print(e)
+    return None
+
+def get_db_info(s,subject_id):
     url = 'https://api.douban.com/v2/movie/subject/{}?apikey={}'.format(subject_id, DB_API_KEY)
     headers = {'User-Agent': UA}
-    for i in range(0, 5):
+    for i in range(0, 3):
         try:
             r = s.get(url, headers=headers)
             r.encoding = 'utf-8'
@@ -68,5 +101,7 @@ def get_db_info(s, subject_id):
                 'douban_rating': info_json['rating']['average']}
             return result
         except Exception:
-            print('第{}次获取ID错误'.format(i))
-    return None
+            print('第{}次获取info错误'.format(i))
+    print('尝试从IMDB API获取info...')
+    result = get_db_info2(s,subject_id)
+    return result
