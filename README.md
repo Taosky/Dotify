@@ -1,5 +1,5 @@
 # TransmissionNotify
-用于Transmission 下载完成后推送电影信息，包括Bark、Telegram...
+用于Transmission 下载完成后推送电影信息，包括Bark、Telegram...(**由于原来流传豆瓣API key权限没收,可能无法使用**)
 
 
 ## Features
