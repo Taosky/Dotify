@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>Movie Notify</title>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.9.2/theme-chalk/index.css">
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.9/vue.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.9.2/index.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.20.0/axios.js"></script>
+</head>
+<body>
+    <div>
+    <div id="app">
+        <div style="margin-top: 15vh;">
+        <el-row>
+            <el-col :span="12" :offset="6">
+                <el-input v-model="path" placeholder="输入路径如： /电影/未归类/西方/黑水（2019）">
+                </el-input>
+                <br>
+                <el-button style="margin-top: 15px;margin-bottom: 20px;" type="primary" :loading="btnload"  v-on:click="push()">开始推送</el-button>
+                <p><span v-html="result"></span></p>
+                
+            </el-col>
+          </el-row>      
+          <div>  
+    </div>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                result: '',
+                path: '',
+                btnload: false
+            },
+            methods: {
+                push:function (){
+                    if (this.path.search(/\/.*?（\d{4}）/)===-1){
+                        this.notifyerror('路径错误，你想清楚再输入');
+                        return
+                    }
+                    this.btnload=true;
+                    let vm = this;
+                    axios.get(`https://notify.cxkun.cn:4399/downloaded?dir=${this.path}&token={{ API_TOKEN }}`)
+                        .then(function (response) {                            
+                            vm.result = response.data;
+                            vm.notifyerror('推送成功')
+                            vm.btnload=false;
+                        })
+                        .catch(function (error) {
+                            vm.notifyerror('推送出错，详见控制台')
+                            console.log(error);
+                            vm.btnload=false;
+                        });                        
+                },
+                notifyerror: function(text) {
+                    const h = this.$createElement;
+                    this.$notify({
+                        title: '提示',
+                        message: h('i', { style: 'color: teal'}, text)
+                    });
+                }
+            }
+})
+    </script>
+</body>
+
+</html>
