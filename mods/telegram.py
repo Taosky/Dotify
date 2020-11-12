@@ -1,13 +1,16 @@
 import json
 import requests
-from config import TG_CHAT_ID, TG_BOT_TOKEN, PROXY_URL, PROXY
+from config import TG_CHAT_ID, TG_BOT_TOKEN, PROXY_URL, PROXY, APP_PAGE
 
 
 def send_message(info_dict, url_path):
-    md_text = '*{} {} （{}）*\n\n“{}” [@豆瓣]({})\n\n导演: {}\n主演: {}\n评分: {}\n路径: {} ' \
+    md_text = '*{} {} （{}）*\n\n“{}” [@豆瓣]({})\n\n导演: {}\n主演: {}\n评分: {}\n路径: {}' \
         .format(info_dict['basic']['title'], info_dict['basic']['original_title'], info_dict['basic']['year'], info_dict['basic']['intro'],
                 info_dict['basic']['douban_url'], info_dict['directors'], info_dict['actors'],
                 info_dict['basic']['douban_rating'], url_path, )
+
+    if APP_PAGE != '':
+        md_text += '\nApp播放：{}'.format(APP_PAGE + info_dict['basic']['douban_url'].split('/')[5])
 
     url = 'https://tg.cxkun.cn/bot{}/sendMessage'.format(TG_BOT_TOKEN)
     data = {'chat_id': TG_CHAT_ID, 'text': md_text, 'parse_mode': 'markdown'}

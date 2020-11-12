@@ -27,3 +27,6 @@ API_TOKEN = 'qecdsf2sds'
 # 代理(对Telegram生效)
 PROXY = False
 PROXY_URL = 'http://127.0.0.1:7890'
+
+# App播放链接(配合LocalMovieDB, 如http://xxx.xx/movie/dbid/, 留空则不显示)
+APP_PAGE = ''
