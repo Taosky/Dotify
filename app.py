@@ -24,8 +24,11 @@ def downloaded():
 
     if not downloaded_dir or token != API_TOKEN:
         return jsonify({'msg': '未授权', 'code':403}), 403
-
-    re_result = re.match(MOVIE_DIR_RE, downloaded_dir.split('/')[-2])
+    
+    if '/' not in downloaded_dir:
+        re_result = re.match(MOVIE_DIR_RE, downloaded_dir)
+    else:
+        re_result = re.match(MOVIE_DIR_RE, downloaded_dir.split('/')[-2])
 
     if re_result and (re_result.group(1), re_result.group(2)):
         res_result = ''
