@@ -34,7 +34,7 @@ def downloaded():
         res_result = ''
         db_info = get_movie(re_result.group(1), re_result.group(2))
         if not db_info:
-            return jsonify({msg: '{}（{}）：获取豆瓣信息出错'.format(re_result.group(1), re_result.group(2)), 'code': 400}), 400
+            return jsonify({'msg': '{}（{}）：获取豆瓣信息出错'.format(re_result.group(1), re_result.group(2)), 'code': 400}), 400
         if TG_ON:
             tg_result = tg.send_message(db_info, downloaded_dir)
             res_result += 'Telegram发送成功, ' if tg_result else 'Telegram: 发送失败, '
