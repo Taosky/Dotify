@@ -35,6 +35,7 @@ def get_db_info(subject_id):
     r = requests.get(url, headers=headers)
     r.encoding = 'utf-8'
     info_json = json.loads(r.text)
+    print(info_json)
     result = {'basic': {
         'title': info_json['title'],
         '_type': '剧集' if info_json['is_tv'] else '电影',
@@ -44,7 +45,7 @@ def get_db_info(subject_id):
         'update_date': datetime.now(),
         'douban_url': 'https://m.douban.com/movie/subject/{}/'.format(subject_id),
         'thumbnail_url': info_json['pic']['large'],
-        'douban_rating': info_json['rating']['value']},
+        'douban_rating': info_json['rating']['value'] if info_json['rating'] else -1},
         'tags': [tag['name'] for tag in info_json['tags']],
         'directors': [director['name'] for director in info_json['directors']],
         'actors': [actor['name'] for actor in info_json['actors']]
