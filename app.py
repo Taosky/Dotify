@@ -1,81 +1,55 @@
-import re
+import os
+import logging
+from mods.notify import send_bark, send_tg
+from flask import Flask, request, jsonify
+from mods.scrape import get_movie_info, get_re_info
 
-import mods.bark as bk
-import mods.telegram as tg
-from config import API_TOKENS, BARK_ON, MOVIE_DIR_RE, TG_ON
-from flask import Flask, render_template, request
-from mods.douban import get_db_id2, get_db_info, login
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+MOVIE_DIR_RE = os.getenv('MOVIE_DIR_RE') if os.getenv(
+    'MOVIE_DIR_RE') else '(.*?)（(\d{4})）'
+TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
+TG_CHAT_ID = os.getenv('TG_CHAT_ID')
+BARK_TOKENS = os.getenv('BARK_TOKENS')
 
 app = Flask(__name__)
-
-UA = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
-
-S = login()
-
-
-def check_db_logout():
-    global S
-    url = 'https://www.douban.com/mine/'
-    ua_headers = {"User-Agent": UA}
-    r = S.get(url, headers=ua_headers)
-    if r.headers.get('Location') == 'https://www.douban.com/accounts/login?redir=https%3A//www.douban.com/mine/':
-        S = login()
-
-
-def get_movie(name, year):
-    print('\n{}({})'.format(name, year))
-    check_db_logout()
-    if S:
-        print('豆瓣登录状态正常\n')
-    else:
-        print('豆瓣登录失败...\n')
-        return None
-    db_id = get_db_id2(S, name, year)
-    if not db_id:
-        print('获取豆瓣Subject ID错误')
-        return None
-    db_info = get_db_info(S, db_id)
-
-    return db_info
-
-
-@app.route('/')
-def index():
-
-    return 'Hello'
 
 
 @app.route('/downloaded')
 def downloaded():
     downloaded_dir = request.args.get('dir')
-    token = request.args.get('token')
 
-    if not downloaded_dir or token not in API_TOKENS:
-        res_result = '参数错误'
-        return res_result
+    if not downloaded_dir:
+        return jsonify({'code': 900, 'msg': '缺少参数'}), 900
+    logging.info(downloaded_dir.split('/')[-2])
 
-    re_result = re.match(MOVIE_DIR_RE, downloaded_dir.split('/')[-2])
-    if re_result and (re_result.group(1), re_result.group(2)):
-        db_info = get_movie(re_result.group(1), re_result.group(2))
-        res_result = '{}（{}）\n'.format(re_result.group(1), re_result.group(2))
-        if not db_info:
-            res_result += '豆瓣: 获取信息错误\n'
-            return res_result
+    title, year = get_re_info(downloaded_dir, MOVIE_DIR_RE)
+    if not title or not year:
+        return jsonify({'code': 901, 'msg': '文件名解析错误'}), 901
 
-        if TG_ON:
-            tg_result = tg.send_message(db_info, downloaded_dir)
-            res_result += 'Telegram: 发送成功\n' if tg_result else 'Telegram: 发送失败\n'
-        if BARK_ON:
-            bark_success_count, bark_fail_count = bk.send_message(db_info)
-            res_result += 'Bark: {}成功,{}失败\n'.format(bark_success_count, bark_fail_count)
-    else:
-        res_result = '无法识别\n'
+    try:
+        db_info = get_movie_info(title, year)
+    except Exception:
+        logging.exception('数据抓取错误')
+        return jsonify({'code': 902, 'msg': '数据抓取错误'}), 902
 
-    return res_result
+    result_msg = ''
+    if TG_BOT_TOKEN and TG_CHAT_ID:
+        tg_result = send_tg(db_info, downloaded_dir, TG_CHAT_ID, TG_BOT_TOKEN)
+        result_msg += 'Telegram 发送'
+        if not tg_result:
+            result_msg += '失败; '
+        else:
+            result_msg += '成功; '
+    if BARK_TOKENS and '_' in BARK_TOKENS:
+        bark_success_count, bark_fail_count = send_bark(db_info, BARK_TOKENS.split('_'))
+        result_msg += 'Bark 发送 '
+        result_msg += '成功: {}, 失败: {}; '.format(
+            bark_success_count, bark_fail_count)
 
-
-
+    return jsonify({'code': 200, 'msg': result_msg}), 200
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0')
+    app.run('0.0.0.0', 4023)
