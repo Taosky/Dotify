@@ -14,7 +14,7 @@ TG_API_PROXY = 'https://tapi.taosky.eu.org'
 
 def send_tg(info_dict, url_path, chat_id, bot_token):
     logging.info('开始telegram推送...')
-    md_text = '*{} {}*\n\n“{}” [@豆瓣]({})\n\n{}\n评分: {}\n路径: {} ' \
+    md_text = '*{} {}*\n\n“{}” [@豆瓣]({})\n\n{}\n\n豆瓣评分 {}\n\n{} ' \
         .format(info_dict['title'], info_dict['original_title'], info_dict['intro'],
                 info_dict['sharing_url'], info_dict['card_subtitle'],
                 info_dict['douban_rating'], url_path, )
@@ -33,9 +33,9 @@ def send_bark(info_dict, tokens):
     logging.info('开始bark推送...')
     success_count = 0
     fail_count = 0
-    title = '{} {} （{}分）'.format(
+    title = '{} {} （豆瓣评分 {}）'.format(
         info_dict['title'], info_dict['original_title'], info_dict['douban_rating'])
-    content = info_dict['intro']
+    content = info_dict['card_subtitle']
     for token in tokens:
         if not token or token == '':
             continue
