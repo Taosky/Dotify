@@ -1,23 +1,24 @@
 # TransmissionNotify
-用于Transmission 下载完成后推送电影信息，包括Bark、Telegram...(**由于原来流传豆瓣API key权限没收,可能无法使用**)
-
-
-## Features
-- Transmission路径API
-- 豆瓣登录获取信息
-- Telegram推送
-- Bark推送
-- Telegram代理
-
+Transmission下载完成, 匹配影视信息，推送至Bark、Telegram
 
 ## 使用说明
-1. 配置运行本程序
-2. 修改Transmission配置参数`script-torrent-done-filename`
-3. 新建Transmission脚本
+1. Docker运行
 ```bash
-#!/bin/sh
-PARAM=$(echo $TR_TORRENT_DIR | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g' | tr -d "\n")
-
-curl "http://<IP或域名>/downloaded?token=<配置文件设置的token>&dir=$PARAM" -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H 'Accept-Language: zh-CN,en-US;q=0.7,en;q=0.3' --compressed -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' -H 'Cache-Control: max-age=0'
-
+docker run -d -p 4023:4023 --name trnotify \
+--env TG_BOT_TOKEN=12345:xxxxx-xxxxx \
+--env TG_CHAT_ID=123456 \
+--env BARK_TOKENS=xxxxxxx_xxxxxxx_xxxxxxx \
+--env PATH_DELETE=/mnt/xxx/Download/ \
+--env PATH_ADD=http://alist.xxx.com/share/ \
+--restart=always ghcr.io/taosky/trnotify:latest
 ```
+    TG_BOT_TOKEN: Telegram Bot Token
+    TG_CHAT_ID: 需要发送的Chat ID
+    BARK_TOKENS: Bark APP (IOS) Token, 以下划线分隔(单个也需要最后加上下划线)
+    PATH_DELETE: 删除下载路径前的部分字符串 (配合下一个变量用于推送时显示链接)
+    PATH_ADD: 在下载路径前加上一部分字符串 (如加上alist页面的路径)
+
+    MOVIE_DIR_RE: 影视文件夹的正则匹配, 默认为`(.*?)（(\d{4})）`, 即下载路径的文件夹须类似`狂飙（2023）`这样
+
+2. 下载脚本[tr_done_script.sh](https://raw.githubusercontent.com/Taosky/TrNotify/master/tr_done_script.sh), 修改权限以便transmission执行`chmod 777 tr_done_script.sh` (如果出错可以检查路径的权限, transmission是不是读)
+3. 修改`script-torrent-done-enabled`为`true`, 修改Transmission配置参数`script-torrent-done-filename`为脚本路径
