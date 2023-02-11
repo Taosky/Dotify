@@ -12,6 +12,8 @@ MOVIE_DIR_RE = os.getenv('MOVIE_DIR_RE') if os.getenv(
 TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
 TG_CHAT_ID = os.getenv('TG_CHAT_ID')
 BARK_TOKENS = os.getenv('BARK_TOKENS')
+PATH_DELETE = os.getenv('PATH_DELETE')
+PATH_ADD = os.getenv('PATH_ADD')
 
 app = Flask(__name__)
 
@@ -19,6 +21,10 @@ app = Flask(__name__)
 @app.route('/downloaded')
 def downloaded():
     downloaded_dir = request.args.get('dir')
+    if PATH_DELETE:
+        downloaded_dir = downloaded_dir.lstrip(PATH_DELETE)
+    if PATH_ADD:
+        downloaded_dir = PATH_ADD + downloaded_dir
 
     if not downloaded_dir:
         return jsonify({'code': 900, 'msg': '缺少参数'}), 900
