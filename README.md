@@ -4,7 +4,7 @@ Transmission下载完成, 匹配影视信息，推送至Bark、Telegram
 ## 使用说明
 1. Docker运行
 ```bash
-docker run -d -p 4023:4023 --name trnotify \
+docker run -d -p 4023:4023 -v /<自定义路径>/trndata:/app/data --name trnotify \
 --env TG_BOT_TOKEN=12345:xxxxx-xxxxx \
 --env TG_CHAT_ID=123456 \
 --env BARK_TOKENS=xxxxxxx_xxxxxxx_xxxxxxx \
