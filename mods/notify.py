@@ -41,8 +41,9 @@ def send_bark(info_dict, tokens):
             continue
         url = 'https://api.day.app/{}/{}/{}'.format(
             token,
-            urllib.parse.quote(title, encoding='utf-8', errors='replace'),
-            urllib.parse.quote(content, encoding='utf-8', errors='replace'))
+            urllib.parse.quote(title, encoding='utf-8',
+                               safe='', errors='replace'),
+            urllib.parse.quote(content, encoding='utf-8', safe='', errors='replace'))
         r = requests.get(url, headers=BARK_HEADERS)
         logging.info(r.text)
         if r.json()['code'] == 200:

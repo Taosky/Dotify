@@ -3,6 +3,7 @@ import logging
 from mods.notify import send_bark, send_tg
 from flask import Flask, request, jsonify
 from mods.scrape import get_movie_info, get_re_info
+from mods.util import read_history, write_history, history_file_exists
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -31,14 +32,21 @@ def downloaded():
     logging.info(downloaded_dir.split('/')[-2])
 
     title, year = get_re_info(downloaded_dir, MOVIE_DIR_RE)
+    movie_str = title + ',' + year
+    
     if not title or not year:
         return jsonify({'code': 901, 'msg': '文件名解析错误'}), 901
+
+    if history_file_exists() and movie_str in read_history():
+        return jsonify({'code': 800, 'msg': '已提交过'}), 800
 
     try:
         db_info = get_movie_info(title, year)
     except Exception:
         logging.exception('数据抓取错误')
         return jsonify({'code': 902, 'msg': '数据抓取错误'}), 902
+
+    write_history(movie_str)
 
     result_msg = ''
     if TG_BOT_TOKEN and TG_CHAT_ID:
@@ -49,7 +57,8 @@ def downloaded():
         else:
             result_msg += '成功; '
     if BARK_TOKENS and '_' in BARK_TOKENS:
-        bark_success_count, bark_fail_count = send_bark(db_info, BARK_TOKENS.split('_'))
+        bark_success_count, bark_fail_count = send_bark(
+            db_info, BARK_TOKENS.split('_'))
         result_msg += 'Bark 发送 '
         result_msg += '成功: {}, 失败: {}; '.format(
             bark_success_count, bark_fail_count)

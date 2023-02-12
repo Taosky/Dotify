@@ -2,36 +2,14 @@ from datetime import datetime
 import logging
 import json
 import re
-import time
-import os.path
+
 import requests
+
+from mods.util import q_file_exists, q_file_expired, download_q_file, read_q_file
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Ailurus/68.0'}
 DOUBAN_MOVIE_JSON_API = 'https://moviedb.8610000.xyz'
-Q_FILE_PATH = 'q.cache'
-
-
-def q_file_exists():
-    return os.path.exists(Q_FILE_PATH)
-
-
-def q_file_expired():
-    filemt = time.mktime(time.localtime(os.stat(Q_FILE_PATH).st_mtime))
-    return time.time() - filemt > 18000
-
-
-def download_q_file():
-    with requests.get('https://gitlab.com/Taosky/partfork/-/raw/master/q.json', headers=HEADERS, stream=True,  timeout=100) as r:
-        with open(Q_FILE_PATH, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
-                f.write(chunk)
-
-
-def read_q_file():
-    with open(Q_FILE_PATH) as f:
-        text = f.read()
-    return json.loads(text)
 
 
 def get_movie_id(q_movies, title, year):
