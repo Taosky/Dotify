@@ -32,10 +32,11 @@ def downloaded():
     logging.info(downloaded_dir.split('/')[-2])
 
     title, year = get_re_info(downloaded_dir, MOVIE_DIR_RE)
-    movie_str = title + ',' + year
     
     if not title or not year:
         return jsonify({'code': 901, 'msg': '文件名解析错误'}), 901
+    
+    movie_str = title + ',' + year
 
     if history_file_exists() and movie_str in read_history():
         return jsonify({'code': 800, 'msg': '已提交过'}), 800
