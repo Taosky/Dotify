@@ -1,5 +1,5 @@
-# TransmissionNotify
-Transmission下载完成, 匹配影视信息，推送至Bark、Telegram
+# dm-notify
+Transmission/qBittorrent下载电影完成,调用脚本匹配影视信息，推送至Bark、Telegram
 
 ## 使用说明
 1. Docker运行
