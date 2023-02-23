@@ -41,10 +41,8 @@ def downloaded():
     if history_file_exists() and movie_str in read_history():
         return jsonify({'code': 800, 'msg': '已提交过'}), 800
 
-    try:
-        db_info = get_movie_info(title, year)
-    except Exception:
-        logging.exception('数据抓取错误')
+    db_info = get_movie_info(title, year)
+    if not db_info:
         return jsonify({'code': 902, 'msg': '数据抓取错误'}), 902
 
     write_history(movie_str)
