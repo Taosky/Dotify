@@ -1,5 +1,5 @@
-# TransmissionNotify
-Transmission下载完成, 匹配影视信息，推送至Bark、Telegram
+# Dotify
+Download Notify. 用于影视下载完成后（qBittorrent / Tranmission）推送信息（Bark / Telegram）
 
 ## 使用说明
 1. Docker运行
@@ -20,5 +20,5 @@ docker run -d -p 4023:4023 -v /<自定义路径>/trndata:/app/data --name trnoti
 
     MOVIE_DIR_RE: 影视文件夹的正则匹配, 默认为`(.*?)（(\d{4})）`, 即下载路径的文件夹须类似`狂飙（2023）`这样
 
-2. 下载脚本[tr_done_script.sh](https://raw.githubusercontent.com/Taosky/TrNotify/master/tr_done_script.sh), 修改权限以便transmission执行`chmod 777 tr_done_script.sh` (如果出错可以检查路径的权限, transmission是不是读)
-3. 修改`script-torrent-done-enabled`为`true`, 修改Transmission配置参数`script-torrent-done-filename`为脚本路径
+2. 下载脚本[tr_done.sh](https://raw.githubusercontent.com/Taosky/TrNotify/master/tr_done.sh) / [qb_done.sh](https://raw.githubusercontent.com/Taosky/TrNotify/master/qb_done.sh), 修改权限以便执行
+3. 在webui进行设置, Transmission在`下载完成后执行脚本`输入路径`/your path/tr_done.sh`, qBittorrent在`torrent 完成时运行外部程序`输入路径加参数`/your path/qbit_done.sh "%D"`
