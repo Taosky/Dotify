@@ -14,10 +14,8 @@ TG_API_PROXY = 'https://tapi.taosky.eu.org'
 
 def send_tg(info_dict, url_path, chat_id, bot_token):
     logging.info('开始telegram推送...')
-    md_text = '*{} {}*\n\n“{}” [@豆瓣]({})\n\n{}\n\n豆瓣评分 {}\n\n{} ' \
-        .format(info_dict['title'], info_dict['original_title'], info_dict['intro'],
-                info_dict['sharing_url'], info_dict['card_subtitle'],
-                info_dict['douban_rating'], url_path, )
+    md_text = '*{} {}*\n\n{}\n评分 {}\n[@豆瓣]({})\n\n{} ' \
+        .format(info_dict['title'], info_dict['original_title'], info_dict['card_subtitle'],info_dict['douban_rating'],info_dict['sharing_url'], url_path, )
 
     url = '{}/bot{}/sendMessage'.format(TG_API_PROXY, bot_token)
     data = {'chat_id': chat_id, 'text': md_text, 'parse_mode': 'markdown'}
