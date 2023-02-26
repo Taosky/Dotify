@@ -43,7 +43,7 @@ def get_movie_info(title, year):
                 'year': info_json['year'],
                 'sharing_url': 'https://movie.douban.com/subject/{}/'.format(info_json['id']),
                 'poster': info_json['poster'],
-                'douban_rating': str(info_json['rating']['value']) if info_json['rating'] > 0 else '暂无'
+                'douban_rating': str(info_json['rating']) if info_json['rating'] > 0 else '暂无'
             }
         else:
             logging.warning('未匹配到相关影视')
